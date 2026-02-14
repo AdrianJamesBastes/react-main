@@ -138,14 +138,29 @@
   background: rgba(255,255,255,0.2);
 }
 
-.mini-map, .leaflet-container {
-  height: 250px !important; /* Force height */
-  width: 100% !important;
+/* 1. SIDEBAR MAP (Small) */
+.mini-map {
+  height: 250px !important;
+  width: 100%;
   border-radius: 12px;
-  display: block !important;
   border: 2px solid rgba(255,255,255,0.2);
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   z-index: 1;
+  overflow: hidden;
+}
+
+/* 2. MAKE LEAFLET FILL ITS CONTAINER (Crucial Fix) */
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* 3. BIG MAP WRAPPER (Fill the Modal) */
+.big-map-wrapper {
+  flex: 1;        /* Take up all remaining space in the modal */
+  width: 100%;
+  height: 100%;   /* Ensure it actually fills the flex parent */
+  overflow: hidden;
 }
 
 /* =========================================

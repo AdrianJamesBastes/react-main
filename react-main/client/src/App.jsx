@@ -13,11 +13,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Helper to move map (Reused for both mini and big maps)
+// Helper to move map & resize correctly
 function MapRecenter({ lat, lng }) {
   const map = useMap();
   useEffect(() => {
-    map.invalidateSize(); // Crucial for the popup map to render correctly
+    map.invalidateSize(); // Crucial for the pop-up map to render correctly
     if (lat && lng) map.flyTo([lat, lng], 15);
   }, [lat, lng, map]);
   return null;
@@ -31,9 +31,10 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSite, setSelectedSite] = useState({ lat: 7.1905, lng: 125.4503 });
   
-  // NEW: State for the Pop-up Map
+  // State for the Pop-up Map
   const [showBigMap, setShowBigMap] = useState(false);
 
+  // Filter Logic
   const filteredResults = results.filter(row => 
     row.PLA_ID.toLowerCase().includes(searchTerm.toLowerCase()) ||
     row["NMS Name"].toLowerCase().includes(searchTerm.toLowerCase())
@@ -46,6 +47,43 @@ function App() {
       reader.onerror = (e) => reject(e);
       reader.readAsText(file);
     });
+  };
+
+  // --- NEW: EXPORT TO CSV FUNCTION ---
+  const handleExport = () => {
+    if (results.length === 0) {
+      alert("No data to export. Please run a scan first.");
+      return;
+    }
+
+    // 1. Define CSV Headers
+    const headers = ["PLA_ID", "Status", "NMS Name", "UDM Name", "Latitude", "Longitude"];
+
+    // 2. Convert Data to CSV Rows
+    const rows = results.map(row => [
+      row.PLA_ID,
+      row.Status,
+      `"${row["NMS Name"] || ""}"`, // Wrap in quotes to handle commas in names
+      `"${row["UDM Name"] || ""}"`,
+      row.Lat,
+      row.Lng
+    ].join(","));
+
+    // 3. Combine Headers and Rows
+    const csvContent = [headers.join(","), ...rows].join("\n");
+
+    // 4. Create a Download Link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "network_reconciliation_report.csv");
+    link.style.visibility = "hidden";
+    
+    // 5. Trigger Download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleScan = async () => {
@@ -93,7 +131,8 @@ function App() {
         <div className="logo-section">
           <img className="globe-logo" src={globeLogo} alt="Globe Logo" />
         </div>
-        <button className="btn primary-outline">Export File</button>
+        {/* EXPORT BUTTON IS NOW CONNECTED */}
+        <button className="btn primary-outline" onClick={handleExport}>Export File</button>
       </header>
 
       <main className="main-layout">
@@ -202,7 +241,7 @@ function App() {
         </section>
       </main>
 
-      {/* --- BIG MAP POPUP --- */}
+      {/* --- BIG MAP POPUP (MODAL) --- */}
       {showBigMap && (
         <div className="map-modal-overlay">
           <div className="map-modal-content">
