@@ -23,7 +23,7 @@ function LoadingScreen() {
         <div className="spinner-ring"></div>
         <img src={globeLogo} alt="Loading..." className="loading-logo" />
       </div>
-      <p className="loading-text">Reconciling Network Data...</p>
+      <p className="loading-text">Comparing Data...</p>
     </div>
   );
 }
@@ -157,6 +157,7 @@ function App() {
     const matchesSearch = 
       row.PLA_ID.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (row["NMS Name"] && row["NMS Name"].toLowerCase().includes(searchTerm.toLowerCase()));
+      
 
     // 2. Check Status Filter (from Card Click)
     const matchesStatus = filterStatus === 'ALL' 
