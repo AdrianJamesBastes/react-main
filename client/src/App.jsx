@@ -3,7 +3,11 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import globeLogo from './assets/Globe_Logo.jpg'; // Ensure this path is correct
+
+// --- IMPORT BOTH LOGO VERSIONS ---
+import globeLogoDark from './assets/Globe_LogoW.png'; // White Text (for Dark Mode)
+import globeLogoLight from './assets/Globe_LogoB.png'; // Black Text (for Light Mode)
+
 import './App.css';
 
 // --- LEAFLET ICON FIX ---
@@ -15,13 +19,14 @@ L.Icon.Default.mergeOptions({
 });
 
 // --- COMPONENT: LOADING SCREEN ---
-function LoadingScreen() {
+function LoadingScreen({ logo }) {
   return (
     <div className="loading-overlay">
       <div className="spinner-box">
         <div className="spinner-ripple"></div>
         <div className="spinner-ring"></div>
-        <img src={globeLogo} alt="Loading..." className="loading-logo" />
+        {/* Use the dynamic logo prop here */}
+        <img src={logo} alt="Loading..." className="loading-logo" />
       </div>
       <p className="loading-text">Comparing Data...</p>
     </div>
@@ -38,11 +43,11 @@ function MapRecenter({ lat, lng }) {
   return null;
 }
 
-// --- COMPONENT: DASHBOARD (Now Interactive) ---
+// --- COMPONENT: DASHBOARD ---
 function Dashboard({ data, activeFilter, onFilterChange }) {
   if (!data || data.length === 0) return null;
 
-  // Calculate counts based on your CSV Status strings
+  // Calculate counts
   const newSites = data.filter(r => r.Status === 'NEW SITE').length;
   const removed = data.filter(r => r.Status === 'REMOVED SITE').length;
   const mismatch = data.filter(r => r.Status === 'NAME MISMATCH').length;
@@ -53,16 +58,17 @@ function Dashboard({ data, activeFilter, onFilterChange }) {
     { name: 'Mismatch', value: mismatch, color: '#ffc107' }
   ].filter(item => item.value > 0);
 
-  // Helper for Card Styles (Visual Feedback)
+  // Helper for Card Styles
   const getCardStyle = (type, colorInfo) => {
     const isActive = activeFilter === type;
     return {
       cursor: 'pointer',
       transition: 'all 0.2s ease',
-      border: isActive ? `2px solid ${colorInfo.border}` : '1px solid #eee',
-      backgroundColor: isActive ? colorInfo.bg : 'white',
+      border: isActive ? `2px solid ${colorInfo.border}` : '1px solid var(--border-color)',
+      // FIX: Use CSS Variable for background so it adapts to Dark Mode
+      backgroundColor: isActive ? colorInfo.bg : 'var(--bg-card)',
       transform: isActive ? 'scale(1.02)' : 'scale(1)',
-      boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.1)' : '0 2px 5px rgba(0,0,0,0.05)'
+      boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.1)' : 'var(--shadow-card)'
     };
   };
 
@@ -89,44 +95,45 @@ function Dashboard({ data, activeFilter, onFilterChange }) {
         </div>
       </div>
 
-      {/* STATS CARDS - Clickable to Filter */}
+      {/* STATS CARDS */}
       <div className="cards-section">
         
-        {/* TOTAL - Resets to ALL */}
+        {/* TOTAL */}
         <div 
           className="stat-card total"
           onClick={() => onFilterChange('ALL')}
-          style={getCardStyle('ALL', { border: '#007bff', bg: '#f0f9ff' })}
+          // Use semi-transparent backgrounds for active state so text remains readable in Dark Mode
+          style={getCardStyle('ALL', { border: '#007bff', bg: 'rgba(0, 123, 255, 0.1)' })}
         >
           <span className="stat-label">Total</span>
           <span className="stat-value">{data.length}</span>
         </div>
 
-        {/* NEW - Filters to 'NEW SITE' */}
+        {/* NEW */}
         <div 
           className="stat-card new"
           onClick={() => onFilterChange('NEW SITE')}
-          style={getCardStyle('NEW SITE', { border: '#28a745', bg: '#eaffea' })}
+          style={getCardStyle('NEW SITE', { border: '#28a745', bg: 'rgba(40, 167, 69, 0.1)' })}
         >
           <span className="stat-label">New</span>
           <span className="stat-value">{newSites}</span>
         </div>
 
-        {/* REMOVED - Filters to 'REMOVED SITE' */}
+        {/* REMOVED */}
         <div 
           className="stat-card removed"
           onClick={() => onFilterChange('REMOVED SITE')}
-          style={getCardStyle('REMOVED SITE', { border: '#dc3545', bg: '#ffeaea' })}
+          style={getCardStyle('REMOVED SITE', { border: '#dc3545', bg: 'rgba(220, 53, 69, 0.1)' })}
         >
           <span className="stat-label">Removed</span>
           <span className="stat-value">{removed}</span>
         </div>
 
-        {/* MISMATCH - Filters to 'NAME MISMATCH' */}
+        {/* MISMATCH */}
         <div 
           className="stat-card mismatch"
           onClick={() => onFilterChange('NAME MISMATCH')}
-          style={getCardStyle('NAME MISMATCH', { border: '#ffc107', bg: '#fffbea' })}
+          style={getCardStyle('NAME MISMATCH', { border: '#ffc107', bg: 'rgba(255, 193, 7, 0.1)' })}
         >
           <span className="stat-label">Mismatch</span>
           <span className="stat-value">{mismatch}</span>
@@ -139,27 +146,46 @@ function Dashboard({ data, activeFilter, onFilterChange }) {
 
 // --- MAIN APP COMPONENT ---
 function App() {
+  // 1. STATE DECLARATIONS
   const [monitorFile1, setMonitorFile1] = useState(null);
   const [monitorFile2, setMonitorFile2] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState([]);
   
-  // --- NEW: Filter State ---
-  const [filterStatus, setFilterStatus] = useState('ALL'); // Default: Show All
-  
+  // Theme State
+  const [isDarkMode, setIsDarkMode] = useState(
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
+  const [filterStatus, setFilterStatus] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSite, setSelectedSite] = useState({ lat: 7.1905, lng: 125.4503 });
+  
+  // FIX: Updated Default Coordinates to Panabo area
+  const [selectedSite, setSelectedSite] = useState({ lat: 7.0588, lng: 125.5786 });
   const [showBigMap, setShowBigMap] = useState(false);
 
-  // --- FILTERING LOGIC ---
+  // 2. EFFECTS
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
+  // 3. HELPER FUNCTIONS
+  const toggleTheme = () => {
+    setIsDarkMode(prev => !prev);
+  };
+
+  // Determine which logo to use
+  const currentLogo = isDarkMode ? globeLogoDark : globeLogoLight;
+
   const filteredResults = results.filter(row => {
-    // 1. Check Search Term
     const matchesSearch = 
       row.PLA_ID.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (row["NMS Name"] && row["NMS Name"].toLowerCase().includes(searchTerm.toLowerCase()));
-      
+      (row["NMS Name"] && row["NMS Name"].toLowerCase().includes(searchTerm.toLowerCase())); 
 
-    // 2. Check Status Filter (from Card Click)
     const matchesStatus = filterStatus === 'ALL' 
       ? true 
       : row.Status === filterStatus;
@@ -182,7 +208,7 @@ function App() {
       return;
     }
     const headers = ["PLA_ID", "Status", "NMS Name", "UDM Name", "Latitude", "Longitude"];
-    const rows = filteredResults.map(row => [ // Export ONLY what is currently visible/filtered
+    const rows = filteredResults.map(row => [
       row.PLA_ID,
       row.Status,
       `"${row["NMS Name"] || ""}"`, 
@@ -208,7 +234,7 @@ function App() {
     }
     setIsLoading(true);
     setResults([]);
-    setFilterStatus('ALL'); // Reset filter on new scan
+    setFilterStatus('ALL');
 
     try {
       const text1 = await readFileAsText(monitorFile1);
@@ -234,7 +260,7 @@ function App() {
              })
              .processCSVComparison(text1, text2);
         } else {
-           // --- LOCAL DEV MODE MOCK DATA (For testing without Apps Script) ---
+           // --- LOCAL DEV MODE MOCK DATA ---
            console.log("Local Mode: Generating Mock Data");
            const mockData = [
              { PLA_ID: "DVO_0172", Status: "NAME MISMATCH", "NMS Name": "Site_A_Old", "UDM Name": "Site_A_New", Lat: 7.17085, Lng: 125.41559 },
@@ -242,7 +268,6 @@ function App() {
              { PLA_ID: "DVO_0179", Status: "REMOVED SITE", "NMS Name": "Site_C_Old", "UDM Name": "", Lat: 7.30454, Lng: 125.43193 },
              { PLA_ID: "DVO_0203", Status: "NAME MISMATCH", "NMS Name": "Site_D_Old", "UDM Name": "Site_D_New", Lat: 7.20092, Lng: 125.54526 },
            ];
-           // Generate more mock data to fill table
            for(let i=0; i<50; i++) {
              mockData.push({ 
                PLA_ID: `DVO_TEST_${i}`, 
@@ -256,7 +281,7 @@ function App() {
            setResults(mockData);
            setIsLoading(false);
         }
-      }, 1500); // Fake delay for animation
+      }, 1500);
 
     } catch (error) {
       alert("Error: " + error.message);
@@ -264,15 +289,29 @@ function App() {
     }
   };
 
+  // 4. RENDER (RETURN JSX)
   return (
     <div className="app-container">
-      {isLoading && <LoadingScreen />}
+      {/* Pass current logo to LoadingScreen */}
+      {isLoading && <LoadingScreen logo={currentLogo} />}
 
       <header className="top-bar">
         <div className="logo-section">
-          <img className="globe-logo" src={globeLogo} alt="Globe Logo" />
+          {/* Use currentLogo for dynamic switching */}
+          <img className="globe-logo" src={currentLogo} alt="Globe Logo" />
         </div>
-        <button className="btn primary-outline" onClick={handleExport}>Export View</button>
+        
+        <div className="header-actions" style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="btn theme-toggle" 
+            onClick={toggleTheme}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDarkMode ? "☀️ Light" : "🌙 Dark"}
+          </button>
+
+          <button className="btn primary-outline" onClick={handleExport}>Export View</button>
+        </div>
       </header>
 
       <main className="main-layout">
@@ -304,6 +343,7 @@ function App() {
               <button className="expand-btn" onClick={() => setShowBigMap(true)} title="Expand Map">⤢</button>
             </div>
             <div className="mini-map">
+              {/* FIX: Removed conditional URL. Now uses standard colorful map always. */}
               <MapContainer center={[selectedSite.lat, selectedSite.lng]} zoom={10} zoomControl={false}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <MapRecenter lat={selectedSite.lat} lng={selectedSite.lng} />
@@ -317,8 +357,6 @@ function App() {
 
         <section className="content-area">
           <div className="output-card">
-            
-            {/* PASSING FILTER PROPS TO DASHBOARD */}
             {results.length > 0 && (
               <Dashboard 
                 data={results} 
@@ -407,6 +445,7 @@ function App() {
               <button className="close-btn" onClick={() => setShowBigMap(false)}>✖ Close</button>
             </div>
             <div className="big-map-wrapper">
+              {/* FIX: Updated Big Map to use original colorful tiles as well */}
               <MapContainer center={[selectedSite.lat, selectedSite.lng]} zoom={15} style={{ height: "100%", width: "100%" }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <MapRecenter lat={selectedSite.lat} lng={selectedSite.lng} />

@@ -1,26 +1,81 @@
 /* =========================================
+   0. THEME VARIABLES (SYSTEM DEPENDENT)
+   ========================================= */
+:root {
+  /* --- DEFAULT (LIGHT MODE) --- */
+  --bg-app: #ffffff;
+  --bg-sidebar: #001f5f;         /* Globe Blue */
+  --bg-content: #f4f6f8;         /* Light Grey */
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-hover: #f2f7ff;
+  --bg-active: #e8f0fe;
+  
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-inverse: #ffffff;       /* White text on dark sidebar */
+  --text-sidebar-muted: rgba(255,255,255,0.7);
+  
+  --border-color: #dee2e6;
+  --border-light: #e0e0e0;
+  
+  --shadow-card: 0 2px 10px rgba(0,0,0,0.05);
+  --map-filter: none;            /* Normal Map Colors */
+}
+
+/* --- DARK MODE OVERRIDES --- */
+body.dark-mode {
+  --bg-app: #111827;             /* Dark Background */
+  --bg-sidebar: #0f172a;         /* Darker Blue/Black */
+  --bg-content: #1f2937;         /* Dark Grey Content Area */
+  --bg-card: #374151;            /* Dark Grey Cards */
+  --bg-input: #1f2937;
+  --bg-hover: #4b5563;           /* Darker Hover */
+  --bg-active: #3b82f6;          /* Blue Active State */
+
+  --text-primary: #f3f4f6;       /* White Text */
+  --text-secondary: #9ca3af;     /* Muted Grey */
+  --text-inverse: #f3f4f6;
+  --text-sidebar-muted: rgba(255,255,255,0.6);
+
+  --border-color: #4b5563;
+  --border-light: #374151;
+
+  --shadow-card: 0 4px 6px rgba(0,0,0,0.3);
+  /* Dims the map slightly so it doesn't blind you in dark mode */
+  --map-filter: brightness(0.8) invert(1) hue-rotate(180deg);
+}
+
+/* =========================================
    1. MAIN LAYOUT & HEADER
    ========================================= */
+body {
+  margin: 0;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 .app-container {
-  height: 100vh; /* Forces app to fit exactly one screen height */
+  height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Prevents double scrollbars */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-app);
 }
 
 .top-bar {
-  height: 70px; /* Fixed height for header */
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  background-color: white;
-  border-bottom: 1px solid #e0e0e0;
-  flex-shrink: 0; /* Prevents header from squishing */
+  background-color: var(--bg-card); /* Changed to var */
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
-/* Fixes the GIANT logo issue */
 .globe-logo {
   height: 50px !important;
   width: auto !important;
@@ -29,8 +84,8 @@
 
 .main-layout {
   display: flex;
-  flex: 1; /* Takes up remaining space */
-  overflow: hidden; /* Contains the scrollbars inside */
+  flex: 1;
+  overflow: hidden;
 }
 
 /* =========================================
@@ -38,16 +93,16 @@
    ========================================= */
 .sidebar {
   width: 300px;
-  background-color: #001f5f; /* Globe Blue */
-  color: white;
+  background-color: var(--bg-sidebar); /* Changed to var */
+  color: var(--text-inverse);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
   overflow-y: auto;
+  border-right: 1px solid var(--border-color); /* Added border for dark mode definition */
 }
 
-/* --- DATA INPUT STYLING --- */
 .upload-group {
   margin-bottom: 1rem;
 }
@@ -56,7 +111,7 @@
   display: block;
   font-size: 0.8rem;
   margin-bottom: 5px;
-  color: rgba(255,255,255,0.7);
+  color: var(--text-sidebar-muted);
 }
 
 .file-drop-area {
@@ -117,7 +172,7 @@
 .map-header-row h4 {
   margin: 0;
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.8);
+  color: var(--text-sidebar-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -147,9 +202,11 @@
   overflow: hidden;
 }
 
+/* DARK MODE MAP FILTER */
 .leaflet-container {
   height: 100% !important;
   width: 100% !important;
+  filter: var(--map-filter); /* Applies dark mode filter */
 }
 
 /* =========================================
@@ -158,26 +215,27 @@
 .content-area {
   flex: 1;
   padding: 2rem;
-  background-color: #f4f6f8;
+  background-color: var(--bg-content); /* Changed to var */
   overflow: hidden;
 }
 
 .output-card {
-  background: white;
+  background: var(--bg-card); /* Changed to var */
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-card);
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Keeps content inside rounded corners */
+  overflow: hidden;
+  border: 1px solid var(--border-color); /* Added border */
 }
 
 /* --- SEARCH BAR STYLING --- */
 .search-bar {
   padding: 6px 12px;
-  border: 1px solid #ccc;
-  background-color: #ffffff !important;
-  color: #333;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input) !important; /* Changed to var */
+  color: var(--text-primary);
   border-radius: 6px;
   font-size: 0.85rem;
   width: 250px;
@@ -192,21 +250,21 @@
 }
 
 /* =========================================
-   5. NEW: TABLE TOOLBAR & GRID
+   5. TABLE TOOLBAR & GRID
    ========================================= */
 .table-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem 1.5rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  border-top: 1px solid #eee; /* Separates from dashboard */
+  background-color: var(--bg-content); /* Match content bg */
+  border-bottom: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
 }
 
 .table-label {
   font-weight: 600;
-  color: #001f5f;
+  color: var(--text-primary); /* Changed to var */
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -217,31 +275,32 @@
   flex: 1;
   overflow: hidden;
   position: relative;
-  border-top: none; /* Seamless join with toolbar */
+  border-top: none;
 }
 
 .table-wrapper {
   width: 100%;
   height: 100%;
   overflow: auto;
+  background-color: var(--bg-card);
 }
 
 .result-table {
   width: 100% !important;
   border-collapse: collapse !important;
   font-family: 'Segoe UI', sans-serif;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
 }
 
 .result-table th {
-  background: #f8f9fa;
+  background: var(--bg-content); /* Changed to var */
   padding: 12px;
   text-align: left;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 10;
-  color: #495057;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   font-weight: 600;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
@@ -249,25 +308,26 @@
 
 .result-table td {
   padding: 10px 12px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   font-size: 0.85rem;
-  color: #333;
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
 .row-hover:hover {
-  background-color: #f2f7ff !important;
+  background-color: var(--bg-hover) !important; /* Changed to var */
   cursor: pointer;
 }
 
 .active-row {
-  background-color: #e8f0fe !important;
+  background-color: var(--bg-active) !important; /* Changed to var */
+  color: white !important; /* Ensure text is readable on active */
   outline: 2px solid #1a73e8;
   outline-offset: -2px;
 }
 
 .font-bold { font-weight: 600; color: #1a73e8; }
-.coord-text { font-family: 'Courier New', monospace; color: #666; }
+.coord-text { font-family: 'Courier New', monospace; color: var(--text-secondary); }
 
 .status-badge {
   padding: 4px 10px;
@@ -285,12 +345,35 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 /* =========================================
    6. GLOBAL BUTTONS
    ========================================= */
+
+/* --- THEME TOGGLE BUTTON --- */
+.theme-toggle {
+  background-color: transparent;
+  border: 1px solid var(--border-color); /* Subtle border */
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme-toggle:hover {
+  background-color: var(--bg-hover);
+  border-color: #001f5f; /* Globe Blue highlight on hover */
+}
+
+/* Dark mode specific hover */
+body.dark-mode .theme-toggle:hover {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
 .btn {
   padding: 0.6rem 1.2rem;
   border-radius: 6px;
@@ -302,8 +385,21 @@
 
 .primary-filled { background-color: white; color: #001f5f; }
 .primary-filled:hover { background-color: #e6e6e6; }
-.primary-outline { border: 2px solid #001f5f; background: transparent; color: #001f5f; }
+
+.primary-outline { 
+  border: 2px solid #001f5f; 
+  background: transparent; 
+  color: #001f5f; 
+}
+/* Dark Mode fix for outline button */
+body.dark-mode .primary-outline {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
 .primary-outline:hover { background: #001f5f; color: white; }
+body.dark-mode .primary-outline:hover { background: #3b82f6; }
+
 .full-width { width: 100%; }
 
 /* =========================================
@@ -323,7 +419,7 @@
 }
 
 .map-modal-content {
-  background: white;
+  background: var(--bg-card); /* Changed to var */
   width: 85vw;
   height: 85vh;
   border-radius: 10px;
@@ -331,11 +427,12 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border: 1px solid var(--border-color);
 }
 
 .map-modal-header {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -343,7 +440,7 @@
 
 .map-modal-header h3 {
   margin: 0;
-  color: #001f5f;
+  color: var(--text-primary);
 }
 
 .close-btn {
@@ -368,24 +465,24 @@
 }
 
 /* =========================================
-   8. NEW: COMPACT ANALYTICS DASHBOARD
+   8. COMPACT ANALYTICS DASHBOARD
    ========================================= */
 .dashboard-container {
   display: flex;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background-color: white; /* Clean white bg */
-  border-bottom: 1px solid #eee;
-  align-items: stretch; /* Cards and Chart match height */
+  background-color: var(--bg-card); /* Changed to var */
+  border-bottom: 1px solid var(--border-color);
+  align-items: stretch;
   flex-shrink: 0;
 }
 
-/* Left: Chart Area - Reduced Size */
+/* Left: Chart Area */
 .chart-section {
-  flex: 0 0 250px; /* FIXED WIDTH prevents giant chart */
-  background: white;
+  flex: 0 0 250px;
+  background: var(--bg-card);
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -396,24 +493,24 @@
 .chart-title {
   margin: 0;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-bottom: 5px;
 }
 
 /* Right: Stats Cards Area */
 .cards-section {
-  flex: 1; /* Takes remaining space */
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
 .stat-card {
-  background: white;
-  padding: 0.8rem; /* Reduced padding */
+  background: var(--bg-card); /* Changed to var */
+  padding: 0.8rem;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -423,7 +520,7 @@
 
 .stat-label {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-bottom: 0.3rem;
   text-align: center;
@@ -432,17 +529,18 @@
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #001f5f;
+  color: var(--text-primary);
 }
 
-/* Color accents */
+/* Color accents - Keep these as specific colors */
 .stat-card.new { border-bottom: 4px solid #28a745; }
 .stat-card.removed { border-bottom: 4px solid #dc3545; }
 .stat-card.mismatch { border-bottom: 4px solid #ffc107; }
 .stat-card.total { border-bottom: 4px solid #001f5f; }
+body.dark-mode .stat-card.total { border-bottom-color: #3b82f6; } /* Adjust blue in dark mode */
 
 /* =========================================
-   8. GLOBE LOADING ANIMATION
+   9. LOADING OVERLAY (Globe Style)
    ========================================= */
 .loading-overlay {
   position: fixed;
@@ -450,76 +548,10 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.85); /* White glass effect */
+  background-color: var(--bg-app); /* Adapts to theme */
+  opacity: 0.95;
   backdrop-filter: blur(5px);
-  z-index: 99999; /* Highest priority */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.spinner-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* The Globe Logo in the center */
-.loading-logo-img {
-  width: 60px; /* Adjust based on your logo image aspect ratio */
-  height: auto;
-  z-index: 2;
-  animation: logo-pulse 2s infinite ease-in-out;
-}
-
-/* The Spinning Blue Ring */
-.spinner-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 4px solid transparent;
-  border-top-color: #001f5f; /* Globe Blue */
-  border-right-color: #26a9e0; /* Globe Light Blue */
-  animation: ring-spin 1s linear infinite;
-}
-
-/* The Pulsing Ripple Effect */
-.spinner-ripple {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 31, 95, 0.3);
-  animation: ripple-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.loading-text {
-  margin-top: 20px;
-  font-family: 'Segoe UI', sans-serif;
-  color: #001f5f;
-  font-weight: 600;
-  font-size: 1.1rem;
-  letter-spacing: 1px;
-  animation: text-fade 2s infinite;
-}
-
-/* =========================================
-   8. LOADING OVERLAY (Globe Style)
-   ========================================= */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(255, 255, 255, 0.9); /* High opacity white */
-  backdrop-filter: blur(5px); /* Blurs the background */
-  z-index: 9999; /* on top of everything */
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -535,7 +567,6 @@
   align-items: center;
 }
 
-/* The Globe Logo Pulse */
 .loading-logo {
   width: 60px;
   height: auto;
@@ -543,19 +574,22 @@
   animation: logo-pulse 2s infinite ease-in-out;
 }
 
-/* The Blue Spinning Ring */
 .spinner-ring {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
   border: 4px solid transparent;
-  border-top-color: #001f5f; /* Globe Dark Blue */
-  border-right-color: #26a9e0; /* Globe Light Blue */
+  border-top-color: #001f5f;
+  border-right-color: #26a9e0;
   animation: spin 1s linear infinite;
 }
+/* Adjust spinner color for dark mode visibility */
+body.dark-mode .spinner-ring {
+  border-top-color: #3b82f6;
+  border-right-color: #06b6d4;
+}
 
-/* The Ripple Effect */
 .spinner-ripple {
   position: absolute;
   width: 100%;
@@ -564,11 +598,14 @@
   border: 2px solid rgba(0, 31, 95, 0.2);
   animation: ripple 1.5s linear infinite;
 }
+body.dark-mode .spinner-ripple {
+  border-color: rgba(59, 130, 246, 0.3);
+}
 
 .loading-text {
   margin-top: 2rem;
   font-family: 'Segoe UI', sans-serif;
-  color: #001f5f;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 1.2rem;
   letter-spacing: 0.5px;
